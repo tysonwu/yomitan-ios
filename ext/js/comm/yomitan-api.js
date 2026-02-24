@@ -345,7 +345,7 @@ export class YomitanApi {
      */
     async _fetchAudio(dictionaryEntries, options) {
         const audioDatas = [];
-        const idleTimeout = (Number.isFinite(options.anki.downloadTimeout) && options.anki.downloadTimeout > 0 ? options.anki.downloadTimeout : null);
+        const idleTimeout = null;
         const languageSummary = getLanguageSummaries().find(({iso}) => iso === options.general.language);
         if (!languageSummary) { return []; }
         for (const dictionaryEntry of dictionaryEntries) {

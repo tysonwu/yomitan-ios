@@ -986,31 +986,17 @@
                                 "type": "object",
                                 "required": [
                                     "enable",
-                                    "server",
                                     "tags",
-                                    "screenshot",
                                     "cardFormats",
-                                    "duplicateScope",
-                                    "duplicateScopeCheckAllModels",
-                                    "checkForDuplicates",
                                     "duplicateBehavior",
                                     "fieldTemplates",
-                                    "suspendNewCards",
-                                    "displayTagsAndFlags",
-                                    "targetTags",
-                                    "noteGuiMode",
-                                    "apiKey",
-                                    "downloadTimeout",
+                                    "redirectAfterAdd",
                                     "forceSync"
                                 ],
                                 "properties": {
                                     "enable": {
                                         "type": "boolean",
                                         "default": false
-                                    },
-                                    "server": {
-                                        "type": "string",
-                                        "default": "http://127.0.0.1:8765"
                                     },
                                     "tags": {
                                         "type": "array",
@@ -1020,26 +1006,6 @@
                                         "default": [
                                             "yomitan"
                                         ]
-                                    },
-                                    "screenshot": {
-                                        "type": "object",
-                                        "required": [
-                                            "format",
-                                            "quality"
-                                        ],
-                                        "properties": {
-                                            "format": {
-                                                "type": "string",
-                                                "enum": ["png", "jpeg"],
-                                                "default": "png"
-                                            },
-                                            "quality": {
-                                                "type": "integer",
-                                                "minimum": 0,
-                                                "maximum": 100,
-                                                "default": 92
-                                            }
-                                        }
                                     },
                                     "cardFormats": {
                                         "type": "array",
@@ -1122,57 +1088,18 @@
                                             }
                                         ]
                                     },
-                                    "duplicateScope": {
-                                        "type": "string",
-                                        "default": "collection",
-                                        "enum": ["collection", "deck", "deck-root"]
-                                    },
-                                    "duplicateScopeCheckAllModels": {
-                                        "type": "boolean",
-                                        "default": false
-                                    },
-                                    "checkForDuplicates": {
-                                        "type": "boolean",
-                                        "default": true
-                                    },
                                     "duplicateBehavior": {
                                         "type": "string",
-                                        "enum": ["prevent", "overwrite", "new"],
-                                        "default": "new"
+                                        "enum": ["prevent", "new"],
+                                        "default": "prevent"
                                     },
                                     "fieldTemplates": {
                                         "type": ["string", "null"],
                                         "default": null
                                     },
-                                    "suspendNewCards": {
+                                    "redirectAfterAdd": {
                                         "type": "boolean",
-                                        "default": false
-                                    },
-                                    "displayTagsAndFlags": {
-                                        "type": "string",
-                                        "enum": ["never", "always", "non-standard", "custom"],
-                                        "default": "never"
-                                    },
-                                    "targetTags": {
-                                        "type": "array",
-                                        "items": {
-                                            "type": "string"
-                                        },
-                                        "default": []
-                                    },
-                                    "noteGuiMode": {
-                                        "type": "string",
-                                        "enum": ["browse", "edit"],
-                                        "default": "browse"
-                                    },
-                                    "apiKey": {
-                                        "type": "string",
-                                        "default": ""
-                                    },
-                                    "downloadTimeout": {
-                                        "type": "number",
-                                        "default": 0,
-                                        "minimum": 0
+                                        "default": true
                                     },
                                     "forceSync": {
                                         "type": "boolean",

@@ -1,5 +1,59 @@
 # Yomitan
 
+## This Fork: iOS Support
+
+This fork adds iOS support for Yomitan by running it as a Chrome extension inside [Orion](https://orionbrowser.com/) (iOS browser that hosts Chrome/Firefox extensions).
+
+**Major change:** Most of the codebase stays untouched. The only significant update is the part where Yomitan adds cards to Anki: AnkiConnect does not exist on iOS, so this fork uses the [Anki URL scheme](https://docs.ankimobile.net/url-schemes.html) to add cards via AnkiMobile instead.
+
+### iOS Usage Model
+
+On iOS, **text scanning** (hover/select to show popup definitions) is largely irrelevant due to Apple’s API limits. The main use is **dictionary search**: open the Search page, type or paste text, and look up terms. The Search page and Settings are the primary interfaces.
+
+### What Works / What Doesn’t (iOS)
+
+| Feature                                                | Status                                                                                |
+| ------------------------------------------------------ | ------------------------------------------------------------------------------------- |
+| **Dictionary search** (Search page)                    | ✅ Works                                                                              |
+| **Dictionary import** (Settings → Dictionaries)        | ✅ Works                                                                              |
+| **Result display, appearance, text parsing**           | ✅ Works                                                                              |
+| **Settings** (profiles, dictionaries, display options) | ✅ Works                                                                              |
+| **Text scanning** (popup on hover/selection)           | ❌ Limited or unavailable on iOS                                                      |
+| **Anki integration** (AnkiConnect)                     | ❌ Not on iOS; see `docs/anki-mobile-settings-plan.md` for AnkiMobile URL scheme plan |
+| **Search window** (separate window)                    | ❌ N/A on mobile                                                                      |
+| **Keyboard shortcuts**                                 | ⚠️ Depends on Orion / system support                                                  |
+
+### Settings vs Original
+
+Settings UI is unchanged from upstream. All sections (Profile, General, Dictionaries, Scanning, Popup, Appearance, etc.) are present. On iOS:
+
+- **Scanning, Popup, Popup Size, Search Window**: Not useful; scanning/popup do not work as on desktop.
+- **Dictionaries, Result Display, Appearance, Text Parsing, Audio**: Use these for dictionary search.
+- **Anki**: AnkiConnect does not run on iOS; AnkiMobile integration is planned (see `docs/anki-mobile-settings-plan.md`).
+- **Backup, Clipboard, Shortcuts**: Behavior depends on Orion and iOS.
+
+### Build and Install on Orion (iOS)
+
+1. **Build the Chrome extension**
+
+   ```bash
+   npm ci
+   npm run license-report:html
+   npm run build -- --target chrome-dev
+   ```
+
+   Output: `builds/yomitan-chrome-dev.zip`.
+
+2. **Transfer the zip to your iPhone** (e.g. AirDrop, iCloud Drive, email).
+
+3. **Install in Orion**
+   - Open Orion → tap **•••** (bottom-right) → **Extensions**
+   - Tap **+** → choose **Install from file**
+   - Select the `yomitan-chrome-dev.zip` file
+   - Enable Chrome extensions in Orion **Settings** if needed
+
+---
+
 [![Get Yomitan for Chrome](<https://img.shields.io/chrome-web-store/v/likgccmbimhjbgkjambclfkhldnlhbnn?logo=Google%20Chrome&style=for-the-badge&logoColor=lightblue&color=lightblue&label=get%20yomitan%20for%20chrome%20(stable)>)](https://chrome.google.com/webstore/detail/yomitan/likgccmbimhjbgkjambclfkhldnlhbnn)
 [![Get Yomitan for Firefox](<https://img.shields.io/amo/v/yomitan?logo=Firefox&style=for-the-badge&color=orange&label=get%20yomitan%20for%20firefox%20(stable)>)](https://addons.mozilla.org/en-US/firefox/addon/yomitan/)
 [![Get Yomitan for Edge](https://img.shields.io/badge/dynamic/json?logo=puzzle&label=get%20yomitan%20for%20edge&style=for-the-badge&query=%24.version&url=https%3A%2F%2Fmicrosoftedge.microsoft.com%2Faddons%2Fgetproductdetailsbycrxid%2Fidelnfbbmikgfiejhgmddlbkfgiifnnn)](https://microsoftedge.microsoft.com/addons/detail/yomitan/idelnfbbmikgfiejhgmddlbkfgiifnnn)

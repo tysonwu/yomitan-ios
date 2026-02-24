@@ -586,6 +586,7 @@ export class OptionsUtil {
             this._updateVersion72,
             this._updateVersion73,
             this._updateVersion74,
+            this._updateVersion75,
         ];
         /* eslint-enable @typescript-eslint/unbound-method */
         if (typeof targetVersion === 'number' && targetVersion < result.length) {
@@ -1829,6 +1830,27 @@ export class OptionsUtil {
      */
     async _updateVersion74(options) {
         await this._applyAnkiFieldTemplatesPatch(options, '/data/templates/anki-field-templates-upgrade-v74.handlebars');
+    }
+
+    /**
+     * - AnkiMobile: remove AnkiConnect-only options, add redirectAfterAdd, simplify duplicateBehavior
+     * @type {import('options-util').UpdateFunction}
+     */
+    _updateVersion75(options) {
+        const removedAnkiKeys = ['server', 'apiKey', 'screenshot', 'downloadTimeout', 'suspendNewCards', 'displayTagsAndFlags', 'targetTags', 'noteGuiMode', 'checkForDuplicates', 'duplicateScope', 'duplicateScopeCheckAllModels'];
+        for (const {options: profileOptions} of options.profiles) {
+            const anki = profileOptions.anki;
+            if (typeof anki !== 'object' || anki === null) { continue; }
+            for (const key of removedAnkiKeys) {
+                delete anki[key];
+            }
+            if (typeof anki.redirectAfterAdd !== 'boolean') {
+                anki.redirectAfterAdd = true;
+            }
+            if (anki.duplicateBehavior === 'overwrite') {
+                anki.duplicateBehavior = 'prevent';
+            }
+        }
     }
 
     /**

@@ -298,21 +298,11 @@ export type ParsingOptions = {
 
 export type AnkiOptions = {
     enable: boolean;
-    server: string;
     tags: string[];
-    screenshot: AnkiScreenshotOptions;
     cardFormats: AnkiCardFormat[];
-    duplicateScope: AnkiDuplicateScope;
-    duplicateScopeCheckAllModels: boolean;
     duplicateBehavior: AnkiDuplicateBehavior;
-    checkForDuplicates: boolean;
     fieldTemplates: string | null;
-    suspendNewCards: boolean;
-    displayTagsAndFlags: AnkiDisplayTagsAndFlags;
-    targetTags: string[];
-    noteGuiMode: AnkiNoteGuiMode;
-    apiKey: string;
-    downloadTimeout: number;
+    redirectAfterAdd: boolean;
     forceSync: boolean;
 };
 
@@ -435,7 +425,7 @@ export type AnkiScreenshotFormat = 'png' | 'jpeg';
 
 export type AnkiDuplicateScope = 'collection' | 'deck' | 'deck-root';
 
-export type AnkiDuplicateBehavior = 'prevent' | 'overwrite' | 'new';
+export type AnkiDuplicateBehavior = 'prevent' | 'new';
 
 export type AnkiDisplayTagsAndFlags = 'never' | 'always' | 'non-standard' | 'custom';
 

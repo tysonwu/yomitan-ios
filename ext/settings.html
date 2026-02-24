@@ -2,7 +2,7 @@
 <html lang="en" data-browser="unknown" data-os="unknown" data-manifest-version="unknown">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1">
     <title>Yomitan Settings</title>
     <link rel="icon" type="image/png" href="/images/icon16.png" sizes="16x16">
     <link rel="icon" type="image/png" href="/images/icon19.png" sizes="19x19">
@@ -1794,11 +1794,9 @@
         </div>
         <div class="heading-description more" hidden>
             <p>
-                Yomitan supports automatic flashcard creation for <a href="https://apps.ankiweb.net/" target="_blank" rel="noopener noreferrer">Anki</a>,
-                a free application designed to assist in remembering information.
-                This feature requires installation of the <a href="https://foosoft.net/projects/anki-connect/" target="_blank" rel="noopener noreferrer">AnkiConnect</a> plugin.
-                <br>
-                See the <a href="https://yomitan.wiki/anki/" target="_blank" rel="noopener noreferrer">Yomitan wiki</a> for a setup guide.
+                Yomitan supports automatic flashcard creation for <a href="https://apps.ankiweb.net/" target="_blank" rel="noopener noreferrer">Anki</a>
+                via the <a href="https://docs.ankimobile.net/url-schemes.html" target="_blank" rel="noopener noreferrer">AnkiMobile URL scheme</a>.
+                Cards are sent to AnkiMobile on iOS when you add them.
             </p>
             <p>
                 <a tabindex="0" class="more-toggle" data-parent-distance="3">Less&hellip;</a>
@@ -1811,8 +1809,7 @@
                 <div class="settings-item-left">
                     <div class="settings-item-label">Enable Anki integration</div>
                     <div class="settings-item-description">
-                        <span>Connection status:</span>
-                        <span id="anki-error-message">&hellip;</span> <a tabindex="0" id="anki-error-message-details-toggle" hidden>Details&hellip;</a>
+                        <span id="anki-error-message">Status: </span>
                         <div class="settings-item-description">
                             This option may send limited information about the current webpage, information contained in Yomitan dictionary entries, and/or relevant user settings outside of Yomitan to Anki<span data-show-for-browser="firefox firefox-mobile"> (<a href="https://addons.mozilla.org/en-US/firefox/addon/yomitan/privacy/">Privacy Policy</a>)</span>.
                         </div>
@@ -1821,47 +1818,6 @@
                 <div class="settings-item-right">
                     <label class="toggle"><input type="checkbox" data-setting="anki.enable"><span class="toggle-body"><span class="toggle-track"></span><span class="toggle-knob"></span></span></label>
                 </div>
-            </div>
-            <div class="settings-item-children" id="anki-error-message-details-container" hidden>
-                <p>
-                    <a tabindex="0" id="anki-error-log">Log error to console</a>
-                </p>
-                <p class="danger-text" id="anki-error-invalid-response-info" hidden>
-                    Attempting to connect to Anki can sometimes return an error message which includes "Invalid response",
-                    which may indicate that the value of the <em>AnkiConnect server address</em> option is incorrect.
-                    Resetting it to the default value may fix issues that are occurring.
-                </p>
-                <div class="danger-text" id="anki-error-message-details"></div>
-            </div>
-            <div class="settings-item-children" data-show-for-os="mac">
-                <p class="warning-text">
-                    <strong>Notice for macOS users:</strong>
-                    If Yomitan has issues connecting to AnkiConnect, it may be necessary to adjust some system settings.
-                    See <a href="https://foosoft.net/projects/anki-connect/#notes-for-mac-os-x-users" target="_blank" rel="noopener noreferrer">this link</a> for details.
-                </p>
-            </div>
-        </div>
-        <div class="settings-item">
-            <div class="settings-item-inner settings-item-inner-wrappable">
-                <div class="settings-item-left">
-                    <div class="settings-item-label">AnkiConnect server address</div>
-                    <div class="settings-item-description">
-                        Change the URL of the AnkiConnect server.
-                        <a tabindex="0" class="more-toggle more-only" data-parent-distance="4">More&hellip;</a>
-                    </div>
-                </div>
-                <div class="settings-item-right">
-                    <input type="text" placeholder="http://127.0.0.1:8765" spellcheck="false" autocomplete="off" data-setting="anki.server">
-                </div>
-            </div>
-            <div class="settings-item-children more" hidden>
-                <p>
-                    The default address for a server on the same device is <a href="http://127.0.0.1:8765" target="_blank" rel="noopener noreferrer">http://127.0.0.1:8765</a>.
-                    If Anki is running and AnkiConnect is installed, clicking this URL should open a page showing the current version of AnkiConnect.
-                </p>
-                <p>
-                    <a tabindex="0" class="more-toggle" data-parent-distance="3">Less&hellip;</a>
-                </p>
             </div>
         </div>
         <div class="settings-item"><div class="settings-item-inner settings-item-inner-wrappable">
@@ -1878,269 +1834,34 @@
                 >
             </div>
         </div></div>
-        <div class="settings-item advanced-only"><div class="settings-item-inner settings-item-inner-wrappable">
+        <div class="settings-item"><div class="settings-item-inner settings-item-inner-wrappable">
             <div class="settings-item-left">
-                <div class="settings-item-label">API key</div>
-                <div class="settings-item-description">Pass a secret value to AnkiConnect API calls.</div>
+                <div class="settings-item-label">When a duplicate is detected</div>
+                <div class="settings-item-description">AnkiMobile does not check for duplicates before adding. This controls whether to allow adding duplicate notes.</div>
             </div>
             <div class="settings-item-right">
-                <input type="password" placeholder="Disabled" spellcheck="false" autocomplete="off" data-setting="anki.apiKey" id="anki-api-key-input">
+                <select data-setting="anki.duplicateBehavior">
+                    <option value="prevent">Prevent adding</option>
+                    <option value="new">Allow adding</option>
+                </select>
             </div>
         </div></div>
-        <div class="settings-item advanced-only">
-            <div class="settings-item-inner">
-                <div class="settings-item-left">
-                    <div class="settings-item-label">Check for card duplicates</div>
-                </div>
-                <div class="settings-item-right">
-                    <label class="toggle"><input type="checkbox" data-setting="anki.checkForDuplicates"
-                        data-transform='{
-                            "type": "setVisibility",
-                            "selector": "#anki-card-duplicate-options",
-                            "condition": {"op": "===", "value": true}
-                        }'
-                    ><span class="toggle-body"><span class="toggle-track"></span><span class="toggle-knob"></span></span></label>
-                </div>
-            </div>
-            <div class="settings-item-children settings-item-children-group" id="anki-card-duplicate-options" hidden>
-                <div class="settings-item">
-                    <div class="settings-item-inner">
-                        <div class="settings-item-left">
-                            <div class="settings-item-label">
-                                Check for duplicates across all models
-                                <a tabindex="0" class="more-toggle more-only" data-parent-distance="4">(?)</a>
-                            </div>
-                        </div>
-                        <div class="settings-item-right">
-                            <label class="toggle"><input type="checkbox" data-setting="anki.duplicateScopeCheckAllModels"><span class="toggle-body"><span class="toggle-track"></span><span class="toggle-knob"></span></span></label>
-                        </div>
-                    </div>
-                    <div class="settings-item-children more" hidden>
-                        <p>
-                            By default, duplicate checks are only performed for notes created with the same model.
-                            Enabling this option will check for duplicates across <em>all</em> model types.
-                        </p>
-                        <p>
-                            <a tabindex="0" class="more-toggle" data-parent-distance="3">Less&hellip;</a>
-                        </p>
-                    </div>
-                </div>
-                <div class="settings-item">
-                    <div class="settings-item-inner settings-item-inner-wrappable">
-                        <div class="settings-item-left">
-                            <div class="settings-item-label">
-                                Duplicate card scope
-                                <a tabindex="0" class="more-toggle more-only" data-parent-distance="4">(?)</a>
-                            </div>
-                        </div>
-                        <div class="settings-item-right">
-                            <select data-setting="anki.duplicateScope">
-                                <option value="collection">Collection</option>
-                                <option value="deck">Deck</option>
-                                <option value="deck-root">Deck root</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="settings-item-children more" hidden>
-                        <p>
-                            A card is considered a duplicate if the value of the first field matches that of any other card.
-                            By default, this check will include cards across all decks in a collection, but this constraint can be relaxed
-                            by using either the <em>Deck</em> or <em>Deck root</em> option.
-                        </p>
-                        <p>
-                            The <em>Deck</em> option will only check for duplicates in the target deck.
-                            The <em>Deck root</em> option will additionally check for duplicates in all child decks of the root deck.
-                            This allows adding cards that are unique for decks including a subdeck structure.
-                            For decks which don't have any parent-child hierarchy, both options function the same.
-                        </p>
-                        <p>
-                            <a tabindex="0" class="more-toggle" data-parent-distance="3">Less&hellip;</a>
-                        </p>
-                    </div>
-                </div>
-                <div class="settings-item">
-                    <div class="settings-item-inner settings-item-inner-wrappable">
-                        <div class="settings-item-left">
-                            <div class="settings-item-label">
-                                When a duplicate is detected
-                                <a tabindex="0" class="more-toggle more-only warning-text" id="anki-overwrite-warning" data-parent-distance="4">(?)</a>
-                            </div>
-                        </div>
-                        <div class="settings-item-right">
-                            <select data-setting="anki.duplicateBehavior">
-                                <option value="prevent">Prevent adding</option>
-                                <option value="overwrite">Allow overwriting</option>
-                                <option value="new">Allow adding</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="settings-item-children more" hidden>
-                        <ul class="warning-text">
-                            <li class="danger-text">Overwriting a card can result in the loss of data.</li>
-                            <li>Duplicate cards of a different note type cannot be overwritten.</li>
-                            <li>If there are multiple duplicate cards, the first card found will be overwritten.</li>
-                            <li>You can customize overwriting for each field in the <code>Configure Anki card format&hellip;</code> menu.</li>
-                        </ul>
-                        <p>
-                            <a tabindex="0" class="more-toggle" data-parent-distance="3">Less&hellip;</a>
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="settings-item advanced-only"><div class="settings-item-inner settings-item-inner-wrappable">
+        <div class="settings-item"><div class="settings-item-inner">
             <div class="settings-item-left">
-                <div class="settings-item-label">Screenshot format</div>
-                <div class="settings-item-description">Adjust the format and quality of screenshots created for cards.</div>
+                <div class="settings-item-label">Redirect to Yomitan after adding</div>
+                <div class="settings-item-description">When enabled, AnkiMobile will return to Yomitan after adding a note (uses x-success in URL scheme).</div>
             </div>
             <div class="settings-item-right">
-                <div class="settings-item-group">
-                    <div class="settings-item-group-item" id="anki-screenshot-quality" hidden>
-                        <div class="settings-item-group-item-label">Quality (%)</div>
-                        <input type="number" class="short-width short-height" data-setting="anki.screenshot.quality" min="0" max="100" step="1">
-                    </div>
-                    <div class="settings-item-group-item">
-                        <div class="settings-item-group-item-label">Format</div>
-                        <select class="short-width short-height" data-setting="anki.screenshot.format"
-                            data-transform='{
-                                "type": "setVisibility",
-                                "selector": "#anki-screenshot-quality",
-                                "condition": {"op": "===", "value": "jpeg"}
-                            }'
-                        >
-                            <option value="png">PNG</option>
-                            <option value="jpeg">JPEG</option>
-                        </select>
-                    </div>
-                </div>
+                <label class="toggle"><input type="checkbox" data-setting="anki.redirectAfterAdd"><span class="toggle-body"><span class="toggle-track"></span><span class="toggle-knob"></span></span></label>
             </div>
         </div></div>
-        <div class="settings-item advanced-only">
-            <div class="settings-item-inner settings-item-inner-wrappable">
-                <div class="settings-item-left">
-                    <div class="settings-item-label">Idle download timeout <span class="light">(in milliseconds)</span></div>
-                    <div class="settings-item-description">
-                        The maximum time before an idle download will be cancelled; 0 = no limit.
-                        <a tabindex="0" class="more-toggle more-only" data-parent-distance="4">More&hellip;</a>
-                    </div>
-                </div>
-                <div class="settings-item-right">
-                    <input type="number" data-setting="anki.downloadTimeout" min="0">
-                </div>
-            </div>
-            <div class="settings-item-children more" hidden>
-                <p>
-                    Audio files can be downloaded from remote servers when creating Anki cards,
-                    and sometimes these downloads can stall due to server or internet connectivity issues.
-                    When this setting has a non-zero value, if a download has stalled for longer than the time specified,
-                    the download will be cancelled.
-                </p>
-                <p class="margin-above">
-                    <a tabindex="0" class="more-toggle" data-parent-distance="3">Less&hellip;</a>
-                </p>
-            </div>
-        </div>
-        <div class="settings-item advanced-only"><div class="settings-item-inner">
-            <div class="settings-item-left">
-                <div class="settings-item-label">Suspend new cards</div>
-                <div class="settings-item-description">New cards will be suspended when a note is added.</div>
-            </div>
-            <div class="settings-item-right">
-                <label class="toggle"><input type="checkbox" data-setting="anki.suspendNewCards"><span class="toggle-body"><span class="toggle-track"></span><span class="toggle-knob"></span></span></label>
-            </div>
-        </div></div>
-        <div class="settings-item advanced-only">
-            <div class="settings-item-inner">
-                <div class="settings-item-left">
-                    <div class="settings-item-label">Note viewer window</div>
-                    <div class="settings-item-description">
-                        Clicking the <em>View added note</em> button shows this window.
-                        <a tabindex="0" class="more-toggle more-only" data-parent-distance="4">More&hellip;</a>
-                    </div>
-                </div>
-                <div class="settings-item-right">
-                    <select data-setting="anki.noteGuiMode">
-                        <option value="browse">Card browser</option>
-                        <option value="edit">Note editor</option>
-                    </select>
-                </div>
-            </div>
-            <div class="settings-item-children more" hidden>
-                <p>
-                    AnkiConnect releases after around 2022-05-29 support a new note editor window
-                    which can be shown when clicking the <em>View added note</em> button.
-                    This can be tested using the buttons below.
-                    If an error occurs, Anki and/or AnkiConnect may need to be updated.
-                </p>
-                <div class="test-anki-note-viewer-container">
-                    <button type="button" class="test-anki-note-viewer-button" data-mode="browse">Test <em>Card browser</em></button>
-                    <button type="button" class="test-anki-note-viewer-button" data-mode="edit">Test <em>Note editor</em></button>
-                    <div class="test-anki-note-viewer-results" id="test-anki-note-viewer-results" hidden></div>
-                </div>
-                <p class="margin-above">
-                    <a tabindex="0" class="more-toggle" data-parent-distance="3">Less&hellip;</a>
-                </p>
-            </div>
-        </div>
-        <div class="settings-item advanced-only">
-            <div class="settings-item-inner">
-                <div class="settings-item-left">
-                    <div class="settings-item-label">
-                        Show card tags and flags
-                        <a tabindex="0" class="more-toggle more-only" data-parent-distance="4">(?)</a>
-                    </div>
-                </div>
-                <div class="settings-item-right">
-                    <select data-setting="anki.displayTagsAndFlags"
-                        data-transform='{
-                            "type": "setVisibility",
-                            "selector": "#anki-target-tags-option",
-                            "condition": {"op": "===", "value": "custom"}
-                        }'
-                    >
-                        <option value="never">Never</option>
-                        <option value="always">Always</option>
-                        <option value="non-standard">Non-standard</option>
-                        <option value="custom">Custom</option>
-                    </select>
-                </div>
-            </div>
-            <div class="settings-item-children more" hidden>
-                <p>
-                    When coming across a word that is already in an Anki deck, two buttons can appear that show
-                    the tags and flags the card has. If set to <em>Non-standard</em>, all tags that are included in the
-                    <em>Card tags</em> option will be filtered out from the list. If set to <em>Custom</em>, only tags that are included in the
-                    <em>Target tags</em> option will be shown. If no tags remain after filtering,
-                    then the tags button will not be shown. If no flags are found, the flags button will not be shown.
-                </p>
-                <p>
-                    <a tabindex="0" class="more-toggle" data-parent-distance="3">Less&hellip;</a>
-                </p>
-            </div>
-        </div>
-        <div class="settings-item advanced-only"><div class="settings-item-inner">
+        <div class="settings-item"><div class="settings-item-inner">
             <div class="settings-item-left">
                 <div class="settings-item-label">Force Anki sync on adding card</div>
-                <div class="settings-item-description">
-                        May cause issues when using in conjuction with Ankiconnect Android, and/or slow or metered connections.
-                    </div>
+                <div class="settings-item-description">Trigger <code>anki://x-callback-url/sync</code> after adding a note.</div>
             </div>
             <div class="settings-item-right">
                 <label class="toggle"><input type="checkbox" data-setting="anki.forceSync"><span class="toggle-body"><span class="toggle-track"></span><span class="toggle-knob"></span></span></label>
-            </div>
-        </div></div>
-        <div class="settings-item advanced-only" id="anki-target-tags-option" hidden><div class="settings-item-inner settings-item-inner-wrappable">
-            <div class="settings-item-left">
-                <div class="settings-item-label">Target tags</div>
-                <div class="settings-item-description">List of space or comma separated tags.</div>
-            </div>
-            <div class="settings-item-right">
-                <input type="text" spellcheck="false" autocomplete="off" data-setting="anki.targetTags"
-                    data-transform='[
-                        {"type": "splitTags", "step": "pre"},
-                        {"type": "joinTags", "step": "post"}
-                    ]'
-                >
             </div>
         </div></div>
         <div class="settings-item settings-item-button" data-modal-action="show,anki-cards"><div class="settings-item-inner">

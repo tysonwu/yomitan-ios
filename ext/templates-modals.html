@@ -936,7 +936,7 @@
                     <div class="settings-item-label">Deck</div>
                 </div>
                 <div class="settings-item-right">
-                    <select class="anki-card-deck"></select>
+                    <input type="text" class="anki-card-deck" autocomplete="off" placeholder="e.g. Default">
                 </div>
             </div></div>
             <div class="settings-item"><div class="settings-item-inner">
@@ -944,7 +944,7 @@
                     <div class="settings-item-label">Model</div>
                 </div>
                 <div class="settings-item-right">
-                    <select class="anki-card-model"></select>
+                    <input type="text" class="anki-card-model" autocomplete="off" placeholder="e.g. Basic">
                 </div>
             </div></div>
             <hr>
@@ -953,6 +953,12 @@
                 <div class="anki-card-field-input-header" data-persistent="true">Value</div>
                 <div class="anki-card-field-overwrite-header" data-persistent="true">Overwrite</div>
             </div>
+            <div class="settings-item"><div class="settings-item-inner">
+                <div class="settings-item-left"></div>
+                <div class="settings-item-right">
+                    <button type="button" class="anki-card-add-field-button">Add field</button>
+                </div>
+            </div></div>
         </div>
         <div class="modal-footer">
             <button type="button" class="danger anki-card-delete-format-button advanced-only">Delete Format</button>
@@ -1446,7 +1452,6 @@
             <button type="button" class="danger" id="generate-anki-notes-export-button-confirm">Export to File</button>
         </div>
     </div></div>
-
 
     <!-- Import/export modals -->
     <div id="settings-import-error-modal" class="modal" tabindex="-1" role="dialog" hidden><div class="modal-content modal-content-small">

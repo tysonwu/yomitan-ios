@@ -199,23 +199,26 @@ export class DisplayAnki {
                 compactTags,
             },
             dictionaries,
-            anki: {
-                tags,
-                targetTags,
-                duplicateScope,
-                duplicateScopeCheckAllModels,
-                duplicateBehavior,
-                suspendNewCards,
-                checkForDuplicates,
-                displayTagsAndFlags,
-                cardFormats,
-                noteGuiMode,
-                screenshot: {format, quality},
-                downloadTimeout,
-                forceSync,
-            },
+            anki,
             scanning: {length: scanLength},
         } = options;
+
+        const ankiOpts = /** @type {Record<string, unknown>} */ (anki ?? {});
+        const tags = /** @type {string[]} */ (ankiOpts.tags ?? []);
+        const targetTags = /** @type {string[]} */ (ankiOpts.targetTags ?? []);
+        const duplicateScope = /** @type {import('settings').AnkiDuplicateScope} */ (ankiOpts.duplicateScope ?? 'collection');
+        const duplicateScopeCheckAllModels = !!ankiOpts.duplicateScopeCheckAllModels;
+        const duplicateBehavior = /** @type {import('settings').AnkiDuplicateBehavior} */ (ankiOpts.duplicateBehavior ?? 'prevent');
+        const suspendNewCards = !!ankiOpts.suspendNewCards;
+        const checkForDuplicates = !!ankiOpts.checkForDuplicates;
+        const displayTagsAndFlags = /** @type {import('settings').AnkiDisplayTagsAndFlags} */ (ankiOpts.displayTagsAndFlags ?? 'never');
+        const cardFormats = /** @type {import('settings').AnkiCardFormat[]} */ (ankiOpts.cardFormats ?? []);
+        const noteGuiMode = /** @type {import('settings').AnkiNoteGuiMode} */ (ankiOpts.noteGuiMode ?? 'default');
+        const screenshot = ankiOpts.screenshot;
+        const format = /** @type {import('settings').AnkiScreenshotFormat} */ ((screenshot && typeof screenshot === 'object' && 'format' in screenshot) ? screenshot.format : 'png');
+        const quality = /** @type {number} */ ((screenshot && typeof screenshot === 'object' && 'quality' in screenshot) ? screenshot.quality : 100);
+        const downloadTimeout = typeof ankiOpts.downloadTimeout === 'number' ? ankiOpts.downloadTimeout : null;
+        const forceSync = !!ankiOpts.forceSync;
 
         this._checkForDuplicates = checkForDuplicates;
         this._suspendNewCards = suspendNewCards;
@@ -232,7 +235,7 @@ export class DisplayAnki {
         this._noteGuiMode = noteGuiMode;
         this._noteTags = [...tags];
         this._targetTags = [...targetTags];
-        this._audioDownloadIdleTimeout = (Number.isFinite(downloadTimeout) && downloadTimeout > 0 ? downloadTimeout : null);
+        this._audioDownloadIdleTimeout = (downloadTimeout !== null && Number.isFinite(downloadTimeout) && downloadTimeout > 0 ? downloadTimeout : null);
         this._cardFormats = cardFormats;
         this._dictionaries = dictionaries;
         this._forceSync = forceSync;
@@ -466,7 +469,7 @@ export class DisplayAnki {
                 const button = this._createSaveButtons(entryIndex, cardFormatIndex);
                 if (button !== null) {
                     button.disabled = !canAdd;
-                    button.hidden = (ankiError !== null);
+                    button.hidden = (ankiError !== null && ankiError.message !== 'Anki not connected');
                     if (ankiError && ankiError.message !== 'Anki not connected') {
                         log.error(ankiError);
                     }
@@ -758,6 +761,92 @@ export class DisplayAnki {
     }
 
     /**
+     * Opens anki:// URL (sync or addnote). Used for AnkiMobile when AnkiConnect unavailable.
+     * @param {string} url
+     */
+    _openAnkiUrl(url) {
+        const a = document.createElement('a');
+        a.href = url;
+        a.style.display = 'none';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+    }
+
+    _openAnkiSyncUrl() {
+        this._openAnkiUrl('anki://x-callback-url/sync');
+    }
+
+    /**
+     * Extracts data-sc-code values from HTML (parity with yomitan_anki add-on add_tag).
+     * @param {string} html
+     * @returns {string[]}
+     */
+    _extractScCodeTags(html) {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html || '', 'text/html');
+        const spans = doc.querySelectorAll('span[data-sc-code]');
+        const tags = [...new Set([...spans].map((s) => s.getAttribute('data-sc-code')).filter((v) => typeof v === 'string'))];
+        return tags;
+    }
+
+    /**
+     * Cleans Pitch field: remove placeholder, keep digits, format as [1,2,3] (parity with yomitan_anki add-on).
+     * @param {string} value
+     * @returns {string}
+     */
+    _cleanPitchField(value) {
+        let pp = (value || '').replace('No pitch accent data', '');
+        if (pp) {
+            const digits = [...pp].filter((c) => /^[0-9]$/.test(c));
+            pp = digits.length > 0 ? `[${digits.join(',')}]` : '';
+        }
+        return pp;
+    }
+
+    /**
+     * Applies add-on parity transforms for AnkiMobile (add-on runs on Desktop, not on Mobile).
+     * @param {import('anki').Note} note
+     * @returns {{fields: import('anki').NoteFields, tags: string[]}}
+     */
+    _applyAnkiMobileNoteTransforms(note) {
+        const fields = {...note.fields};
+        const tags = [...note.tags];
+        if (fields['Meaning']) {
+            for (const tag of this._extractScCodeTags(fields['Meaning'])) {
+                if (!tags.includes(tag)) { tags.push(tag); }
+            }
+        }
+        if (typeof fields['Pitch'] === 'string') {
+            fields['Pitch'] = this._cleanPitchField(fields['Pitch']);
+        }
+        return {fields, tags};
+    }
+
+    /**
+     * Builds anki:// addnote URL for AnkiMobile (x-callback-url). Used for debug logging.
+     * Applies add-on parity transforms (add_tag, cleaning) since AnkiMobile has no add-ons.
+     * @param {import('anki').Note} note
+     * @returns {string}
+     */
+    _buildAnkiMobileAddnoteUrl(note) {
+        const {fields, tags} = this._applyAnkiMobileNoteTransforms(note);
+        const params = new URLSearchParams();
+        params.set('type', note.modelName);
+        params.set('deck', note.deckName);
+        for (const [name, value] of Object.entries(fields)) {
+            params.set(`fld${name}`, value);
+        }
+        if (tags.length > 0) {
+            params.set('tags', tags.join(' '));
+        }
+        if (note.options?.allowDuplicate) {
+            params.set('dupes', '1');
+        }
+        return `anki://x-callback-url/addnote?${params.toString().replace(/\+/g, '%20')}`;
+    }
+
+    /**
      * @param {import('anki').Note} note
      * @param {Error[]} allErrors
      * @param {HTMLButtonElement} button
@@ -766,18 +855,36 @@ export class DisplayAnki {
     async _addNewAnkiNote(note, allErrors, button, dictionaryEntryIndex) {
         let noteId = null;
         let addNoteOkay = false;
+        let usedAnkiUrlFallback = false;
+        const ankiSchemaUrl = this._buildAnkiMobileAddnoteUrl(note);
+        log.log('[Anki add] anki schema URL (AnkiMobile):', ankiSchemaUrl);
+        log.log('[Anki add] attempting to add note', {deck: note.deckName, model: note.modelName, fields: note.fields});
         try {
             noteId = await this._display.application.api.addAnkiNote(note);
             addNoteOkay = true;
+            log.log('[Anki add] note added successfully', {noteId});
         } catch (e) {
-            allErrors.length = 0;
-            allErrors.push(toError(e));
+            log.log('[Anki add] failed to add note:', e);
+            const isConnectionFailure = e instanceof ExtensionError && e.message.includes('Anki connection failure');
+            if (isConnectionFailure) {
+                log.log('[Anki add] AnkiConnect unavailable, using anki:// URL scheme:', ankiSchemaUrl);
+                this._openAnkiUrl(ankiSchemaUrl);
+                addNoteOkay = true;
+                usedAnkiUrlFallback = true;
+                if (this._forceSync) {
+                    setTimeout(() => this._openAnkiSyncUrl(), 800);
+                }
+                allErrors.length = 0;
+            } else {
+                allErrors.length = 0;
+                allErrors.push(toError(e));
+            }
         }
 
         if (addNoteOkay) {
-            if (noteId === null) {
+            if (noteId === null && !usedAnkiUrlFallback) {
                 allErrors.push(new Error('Note could not be added'));
-            } else {
+            } else if (noteId !== null) {
                 if (this._suspendNewCards) {
                     try {
                         await this._display.application.api.suspendAnkiCardsForNote(noteId);
@@ -792,11 +899,7 @@ export class DisplayAnki {
                 this._updateViewNoteButton(dictionaryEntryIndex, cardFormatIndex, [noteId]);
 
                 if (this._forceSync) {
-                    try {
-                        await this._display.application.api.forceSync();
-                    } catch (e) {
-                        allErrors.push(toError(e));
-                    }
+                    this._openAnkiSyncUrl();
                 }
             }
         }
@@ -1002,11 +1105,12 @@ export class DisplayAnki {
                 infos = await this._display.application.api.getAnkiNoteInfo(validNotes, this._isAdditionalInfoEnabled());
             } else {
                 const isAnkiConnected = await this._display.application.api.isAnkiConnected();
-                infos = this._getAnkiNoteInfoForceValueIfValid(validNotes, isAnkiConnected);
+                infos = this._getAnkiNoteInfoForceValueIfValid(validNotes, true);
                 ankiError = isAnkiConnected ? null : new Error('Anki not connected');
             }
         } catch (e) {
-            infos = this._getAnkiNoteInfoForceValueIfValid(validNotes, false);
+            const isConnectionError = e instanceof ExtensionError && e.message.includes('Anki connection failure');
+            infos = this._getAnkiNoteInfoForceValueIfValid(validNotes, isConnectionError);
             ankiError = (e instanceof ExtensionError && e.message.includes('Anki connection failure')) ?
                 new Error('Anki not connected') :
                 toError(e);

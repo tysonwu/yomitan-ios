@@ -34,6 +34,12 @@ export class API {
 
         /** @type {MessagePort?} */
         this._backendPort = backendPort;
+
+        /** @type {number} */
+        this._pendingInvokeCount = 0;
+
+        /** @type {?import('core').Timeout} */
+        this._pendingInvokeKeepAliveTimer = null;
     }
 
     /**
@@ -447,8 +453,10 @@ export class API {
         /** @type {import('api').ApiMessage<TAction>} */
         const data = {action, params};
         return new Promise((resolve, reject) => {
+            this._addPendingInvoke();
             try {
                 this._webExtension.sendMessage(data, (response) => {
+                    this._removePendingInvoke();
                     this._webExtension.getLastError();
                     if (response !== null && typeof response === 'object') {
                         const {error} = /** @type {import('core').UnknownObject} */ (response);
@@ -464,9 +472,33 @@ export class API {
                     }
                 });
             } catch (e) {
+                this._removePendingInvoke();
                 reject(e);
             }
         });
+    }
+
+    /**
+     * Some browsers (e.g. Orion on iOS) hold back asynchronous `sendResponse` replies from the background
+     * until it receives another message. While any request is pending, a heartbeat is sent periodically
+     * so those replies are delivered promptly instead of waiting for the next periodic heartbeat.
+     */
+    _addPendingInvoke() {
+        if (++this._pendingInvokeCount !== 1) { return; }
+        this._pendingInvokeKeepAliveTimer = setInterval(() => {
+            try {
+                this._webExtension.sendMessageIgnoreResponse({action: 'heartbeat', params: void 0});
+            } catch (e) {
+                // NOP
+            }
+        }, 100);
+    }
+
+    /** */
+    _removePendingInvoke() {
+        if (--this._pendingInvokeCount !== 0 || this._pendingInvokeKeepAliveTimer === null) { return; }
+        clearInterval(this._pendingInvokeKeepAliveTimer);
+        this._pendingInvokeKeepAliveTimer = null;
     }
 
     /**
